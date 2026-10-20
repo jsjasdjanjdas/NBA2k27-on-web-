@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Mini 2K Builder</title>
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    .row { margin-bottom: 12px; }
+    .badge { margin-top: 10px; padding: 8px; border: 1px solid #ccc; }
+    .tier { font-weight: bold; }
+  </style>
+</head>
+
+<body>
+<h2>Mini NBA 2K‑Style Builder</h2>
+
+<!-- BODY SETTINGS -->
+<div class="row">
+  <label>Height (inches): </label>
+  <input type="number" id="height" value="75" min="65" max="90">
+</div>
+
+<!-- ATTRIBUTE SLIDERS -->
+<div class="row">
+  <label>Three‑Point Shot</label><br>
+  <input type="range" id="threePoint" min="25" max="99" value="70">
+  <span id="threePointVal">70</span>
+</div>
+
+<div class="row">
+  <label>Perimeter Defense</label><br>
+  <input type="range" id="perDef" min="25" max="99" value="60">
+  <span id="perDefVal">60</span>
+</div>
+
+<!-- BADGE PREVIEW -->
+<div class="badge">
+  <h3>Badge: Challenger</h3>
+  <div>Tier: <span id="challengerTier">None</span></div>
+</div>
+
+<!-- OVR -->
+<h3>OVR: <span id="ovr">0</span></h3>
+
+<script>
+// ---------------- DATA MODEL ----------------
+const attributes = {
+  threePoint: { value: 70, weight: 0.55 },
+  perDef: { value: 60, weight: 0.50 }
+};
+
+// Simple badge requirement table
+const challengerBadge = {
+  tiers: {
+    hof:   { perDef: 95 },
+    gold:  { perDef: 87 },
+    silver:{ perDef: 80 },
+    bronze:{ perDef: 70 }
+  }
+};
+
+// ---------------- LOGIC ----------------
+function updateAttribute(id) {
+  const slider = document.getElementById(id);
+  const valSpan = document.getElementById(id + "Val");
+  attributes[id].value = Number(slider.value);
+  valSpan.textContent = slider.value;
+  updateBadge();
+  updateOVR();
+}
+
+function updateBadge() {
+  const pd = attributes.perDef.value;
+  let tier = "None";
+
+  for (const t of ["hof","gold","silver","bronze"]) {
+    if (pd >= challengerBadge.tiers[t].perDef) {
+      tier = t.toUpperCase();
+      break;
+    }
+  }
+  document.getElementById("challengerTier").textContent = tier;
+}
+
+function updateOVR() {
+  let score = 0;
+  for (const attr of Object.values(attributes)) {
+    score += attr.value * attr.weight;
+  }
+  document.getElementById("ovr").textContent = Math.round(score);
+}
+
+// ---------------- EVENT HOOKS ----------------
+document.getElementById("threePoint").oninput = () => updateAttribute("threePoint");
+document.getElementById("perDef").oninput = () => updateAttribute("perDef");
+
+// Initial render
+updateBadge();
+updateOVR();
+</script>
+
+</body>
+</html>
